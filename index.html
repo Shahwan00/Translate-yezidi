@@ -5,13 +5,17 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>تحويل الحروف إلى الإيزيدية</title>
 
-  <!-- استدعاء خط الإيزيدية الرسمي من غوغل -->
+  <!-- تحميل خط النوتو الإيزيدي المعتمد -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Yezidi:wght@400;700&display=swap" rel="stylesheet">
 
   <style>
-    * { box-sizing: border-box; font-family: system-ui, -apple-system, sans-serif; }
+    * { 
+      box-sizing: border-box; 
+      font-family: system-ui, -apple-system, sans-serif; 
+    }
+    
     body { background-color: #f0f2f5; margin: 0; padding: 20px; color: #333; }
     h1 { text-align: center; margin-bottom: 5px; color: #1a1a1a; }
     p.subtitle { text-align: center; color: #666; margin-bottom: 25px; }
@@ -24,7 +28,6 @@
       gap: 15px;
     }
 
-    /* نافذة الاختيارات الحروف المتعددة */
     .char-picker {
       background: #e7f5ff;
       border: 2px solid #4a90e2;
@@ -134,70 +137,116 @@
   </div>
 
   <script>
-    // الخريطة الأساسية بناءً على الجدول المرفق حصراً
+    // خريطة التحويل الأساسية بناءً على الجدول المحدد
     const defaultMap = {
-      'a': '\u{10E80}', 'ا': '\u{10E80}',
-      'b': '\u{10E81}', 'ب': '\u{10E81}',
-      'p': '\u{10E82}', 'پ': '\u{10E82}',
-      'c': '\u{10E86}', 'ج': '\u{10E86}',
-      'ç': '\u{10E87}', 'چ': '\u{10E87}',
-      'd': '\u{10E8B}', 'د': '\u{10E8B}',
-      'r': '\u{10E8D}', 'ر': '\u{10E8D}',
-      'rr': '\u{10E8E}', 'ڕ': '\u{10E8E}',
-      'z': '\u{10E8F}', 'ز': '\u{10E8F}',
-      'j': '\u{10E90}', 'ژ': '\u{10E90}',
-      's': '\u{10E91}', 'س': '\u{10E91}',
-      'ş': '\u{10E92}', 'ش': '\u{10E92}',
+      // لاتيني
+      'a': '\u{10E80}',
+      'b': '\u{10E81}',
+      'p': '\u{10E82}', // خيار افتراضي أول لـ P
+      'c': '\u{10E86}',
+      'ç': '\u{10E87}', // خيار افتراضي أول لـ Ç
+      'd': '\u{10E8B}',
+      'r': '\u{10E8D}',
+      'z': '\u{10E8F}',
+      'j': '\u{10E90}',
+      's': '\u{10E91}',
+      'ş': '\u{10E92}',
+      'f': '\u{10E99}',
+      'v': '\u{10E9B}',
+      'q': '\u{10E9C}',
+      'k': '\u{10E9D}',
+      'g': '\u{10E9F}', // خيار افتراضي أول لـ G
+      'l': '\u{10E9E}',
+      'm': '\u{10EA1}',
+      'n': '\u{10EA2}',
+      'w': '\u{10EA3}',
+      'o': '\u{10EA5}',
+      'e': '\u{10EA6}',
+      'h': '\u{10EA7}',
+      'y': '\u{10EA8}',
+      'ê': '\u{10EA9}',
+      'x': '\u{10E8A}',
+      't': '\u{10E84}',
+      'î': '\u{10EB1}',
+      'i': '\u{10E8C}',
+
+      // عربي / كوردية
+      'ا': '\u{10E80}',
+      'أ': '\u{10E80}',
+      'إ': '\u{10E80}',
+      'آ': '\u{10E80}',
+      'ب': '\u{10E81}',
+      'پ': '\u{10E82}',
+      'ج': '\u{10E86}',
+      'چ': '\u{10E87}',
+      'د': '\u{10E8B}',
+      'ر': '\u{10E8D}',
+      'ڕ': '\u{10E8E}',
+      'ز': '\u{10E8F}',
+      'ژ': '\u{10E90}',
+      'س': '\u{10E91}',
+      'ش': '\u{10E92}',
       'ع': '\u{10E97}',
-      'f': '\u{10E99}', 'ف': '\u{10E99}',
-      'v': '\u{10E9B}', 'ڤ': '\u{10E9B}',
-      'q': '\u{10E9C}', 'ق': '\u{10E9C}',
-      'k': '\u{10E9D}', 'ك': '\u{10E9D}',
-      'g': '\u{10E9F}', 'گ': '\u{10E9F}',
-      'l': '\u{10EA0}', 'ل': '\u{10EA0}',
-      'll': '\u{10EB0}', 'ڵ': '\u{10EB0}',
-      'm': '\u{10EA1}', 'م': '\u{10EA1}',
-      'n': '\u{10EA2}', 'ن': '\u{10EA2}',
-      'w': '\u{10EA3}', 'و': '\u{10EA3}',
-      'o': '\u{10EA5}', 'ۆ': '\u{10EA5}',
-      'e': '\u{10EA6}', 'ە': '\u{10EA6}',
-      'h': '\u{10EA7}', 'ه': '\u{10EA7}',
-      'y': '\u{10EA8}', 'ي': '\u{10EA8}',
-      'ê': '\u{10EA9}', 'ێ': '\u{10EA9}',
-      'x': '\u{10E8A}', 'خ': '\u{10E8A}',
+      'ف': '\u{10E99}',
+      'ڤ': '\u{10E9B}',
+      'ق': '\u{10E9C}',
+      'ك': '\u{10E9D}',
+      'گ': '\u{10E9F}',
+      'ل': '\u{10E9E}',
+      'ڵ': '\u{10EB0}',
+      'م': '\u{10EA1}',
+      'ن': '\u{10EA2}',
+      'و': '\u{10EA3}',
+      'ۆ': '\u{10EA5}',
+      'ە': '\u{10EA6}',
+      'ه': '\u{10EA7}',
+      'ي': '\u{10EA8}',
+      'ێ': '\u{10EA9}',
+      'خ': '\u{10E8A}',
       'ح': '\u{10E89}',
-      't': '\u{10E84}', 'ت': '\u{10E84}',
+      'ت': '\u{10E84}',
       'ط': '\u{10E95}',
       'غ': '\u{10E98}',
-      'î': '\u{10EB1}', 'ئ': '\u{10EB1}',
-      'i': '\u{10E8C}'
+      'ئ': '\u{10EB1}'
     };
 
-    // الحروف التي تمتلك أكثر من خيار إيزيدي حسب قائمتك
+    // خيارات الأحرف المزدوجة بناءً على الجدول الخاص بك
     const multiCharOptions = {
       'پ': [
-        { label: 'پ (𐺂)', val: '\u{10E82}' },
-        { label: 'پ (𐺃)', val: '\u{10E83}' }
+        { label: '𐺂', val: '\u{10E82}' },
+        { label: '𐺃', val: '\u{10E83}' }
+      ],
+      'P': [
+        { label: '𐺂', val: '\u{10E82}' },
+        { label: '𐺃', val: '\u{10E83}' }
       ],
       'p': [
-        { label: 'P (𐺂)', val: '\u{10E82}' },
-        { label: 'P (𐺃)', val: '\u{10E83}' }
+        { label: '𐺂', val: '\u{10E82}' },
+        { label: '𐺃', val: '\u{10E83}' }
       ],
       'چ': [
-        { label: 'چ (𐺇)', val: '\u{10E87}' },
-        { label: 'چ (𐺈)', val: '\u{10E88}' }
+        { label: '𐺇', val: '\u{10E87}' },
+        { label: '𐺈', val: '\u{10E88}' }
+      ],
+      'Ç': [
+        { label: '𐺇', val: '\u{10E87}' },
+        { label: '𐺈', val: '\u{10E88}' }
       ],
       'ç': [
-        { label: 'Ç (𐺇)', val: '\u{10E87}' },
-        { label: 'Ç (𐺈)', val: '\u{10E88}' }
+        { label: '𐺇', val: '\u{10E87}' },
+        { label: '𐺈', val: '\u{10E88}' }
       ],
       'گ': [
-        { label: 'گ (𐺟)', val: '\u{10E9F}' },
-        { label: 'گ (𐺞)', val: '\u{10E9E}' }
+        { label: '𐺟', val: '\u{10E9F}' },
+        { label: '𐺞', val: '\u{10E9E}' }
+      ],
+      'G': [
+        { label: '𐺟', val: '\u{10E9F}' },
+        { label: '𐺞', val: '\u{10E9E}' }
       ],
       'g': [
-        { label: 'G (𐺟)', val: '\u{10E9F}' },
-        { label: 'G (𐺞)', val: '\u{10E9E}' }
+        { label: '𐺟', val: '\u{10E9F}' },
+        { label: '𐺞', val: '\u{10E9E}' }
       ]
     };
 
@@ -227,7 +276,7 @@
       let output = '';
       for (let char of Array.from(inputText)) {
         const lower = char.toLowerCase();
-        output += defaultMap[lower] !== undefined ? defaultMap[lower] : char;
+        output += defaultMap[lower] !== undefined ? defaultMap[lower] : (defaultMap[char] !== undefined ? defaultMap[char] : char);
       }
       document.getElementById('output-text').value = output;
     }
@@ -237,7 +286,7 @@
       const title = document.getElementById('picker-title');
       const container = document.getElementById('picker-options');
 
-      title.innerText = `اختر الرمز الإيزيدي المناسب لـ (${char}):`;
+      title.innerText = `اختر الرمز الإيزيدي لـ (${char}):`;
       container.innerHTML = '';
 
       options.forEach(opt => {
