@@ -3,20 +3,67 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>مترجم الحروف إلى الإيزيدية</title>
+  <title>تحويل الحروف إلى الإيزيدية</title>
   <style>
     * { box-sizing: border-box; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
     body { background-color: #f0f2f5; margin: 0; padding: 20px; color: #333; }
     h1 { text-align: center; margin-bottom: 5px; color: #1a1a1a; }
     p.subtitle { text-align: center; color: #666; margin-bottom: 25px; }
     
+    .main-container {
+      max-width: 1000px;
+      margin: 0 auto;
+      display: flex;
+      flex-direction: column;
+      gap: 15px;
+    }
+
+    /* نافذة اختيارات الحروف العائمة والمضمونة الظهور */
+    .char-picker {
+      background: #e7f5ff;
+      border: 2px solid #4a90e2;
+      border-radius: 8px;
+      padding: 12px 15px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+      display: none; /* تظهر فقط عند كتابة الحروف المستهدفة */
+      text-align: center;
+    }
+
+    .char-picker p {
+      margin: 0 0 10px 0;
+      font-size: 16px;
+      font-weight: bold;
+      color: #1864ab;
+    }
+
+    .picker-options {
+      display: flex;
+      gap: 10px;
+      justify-content: center;
+      flex-wrap: wrap;
+    }
+
+    .picker-btn {
+      background: #ffffff;
+      border: 2px solid #1c7ed6;
+      color: #1c7ed6;
+      padding: 8px 16px;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 20px;
+      font-weight: bold;
+      transition: all 0.2s ease;
+    }
+
+    .picker-btn:active, .picker-btn:hover {
+      background: #1c7ed6;
+      color: #ffffff;
+    }
+
     .translator-box {
       display: flex;
       flex-direction: row;
       gap: 15px;
-      max-width: 1000px;
-      margin: 0 auto;
-      position: relative;
     }
     
     .panel {
@@ -33,11 +80,11 @@
     
     textarea {
       width: 100%;
-      height: 220px;
+      height: 200px;
       border: 1px solid #ccc;
       border-radius: 6px;
       padding: 12px;
-      font-size: 18px;
+      font-size: 20px;
       resize: vertical;
       outline: none;
     }
@@ -46,84 +93,43 @@
     
     .ezidi-output {
       background-color: #fafafa;
-      font-size: 22px;
+      font-size: 24px;
       line-height: 1.6;
     }
 
-    /* نافذة الخيارات العائمة */
-    .char-picker {
-      position: absolute;
-      top: 50px;
-      right: 25px;
-      background: #ffffff;
-      border: 2px solid #4a90e2;
-      border-radius: 8px;
-      padding: 12px;
-      box-shadow: 0 4px 15px rgba(0,0,0,0.15);
-      display: none;
-      z-index: 100;
-    }
-
-    .char-picker p {
-      margin: 0 0 8px 0;
-      font-size: 14px;
-      font-weight: bold;
-      color: #333;
-    }
-
-    .picker-options {
-      display: flex;
-      gap: 8px;
-      flex-wrap: wrap;
-    }
-
-    .picker-btn {
-      background: #e7f5ff;
-      border: 1px solid #74c0fc;
-      color: #1864ab;
-      padding: 6px 12px;
-      border-radius: 5px;
-      cursor: pointer;
-      font-size: 18px;
-      font-weight: bold;
-      transition: background 0.2s;
-    }
-
-    .picker-btn:hover { background: #d0ebff; }
-
     @media (max-width: 768px) {
       .translator-box { flex-direction: column; }
-      .char-picker { right: 15px; left: 15px; }
     }
   </style>
 </head>
 <body>
 
   <h1>تحويل الحروف إلى الإيزيدية</h1>
-  <p class="subtitle">اكتب بالعربية أو الكرمانجية في أي مكان وتظهر قائمة الاختيارات فوراً</p>
+  <p class="subtitle">اكتب بالعربية أو الكرمانجية (اللاتينية) للتحويل المباشر</p>
 
-  <div class="translator-box">
-    <!-- نافذة اختيارات الحروف المتاحة -->
+  <div class="main-container">
+    <!-- شريط الخيارات (يظهر أعلى الحقول مباشرة عند كتابة ك، ج، چ، ح، س) -->
     <div id="char-picker" class="char-picker">
-      <p id="picker-title">اختر الحرف الإيزيدي المطلوب:</p>
+      <p id="picker-title">اختر الرمز الإيزيدي المطلوب:</p>
       <div id="picker-options" class="picker-options"></div>
     </div>
 
-    <!-- حقل الإدخال -->
-    <div class="panel">
-      <label for="input-text">النص الأصلي (عربي / لاتيني):</label>
-      <textarea id="input-text" placeholder="اكتب أي حرف في البداية أو الوسط أو النهاية..." oninput="handleInput(event)"></textarea>
-    </div>
+    <div class="translator-box">
+      <!-- حقل الإدخال -->
+      <div class="panel">
+        <label for="input-text">النص الأصلي (عربي / لاتيني):</label>
+        <textarea id="input-text" placeholder="اكتب هنا..." oninput="handleInput()"></textarea>
+      </div>
 
-    <!-- حقل النتيجة -->
-    <div class="panel">
-      <label for="output-text">النص الإيزيدي (Ezidi):</label>
-      <textarea id="output-text" class="ezidi-output" readonly placeholder="النتيجة تظهر هنا..."></textarea>
+      <!-- حقل النتيجة -->
+      <div class="panel">
+        <label for="output-text">النص الإيزيدي (Ezidi):</label>
+        <textarea id="output-text" class="ezidi-output" readonly placeholder="النتيجة تظهر هنا..."></textarea>
+      </div>
     </div>
   </div>
 
   <script>
-    // 1. خريطة التحويل الافتراضية للحروف
     const defaultMap = {
       'a': '𐺀', 'b': '𐺁', 'c': '𐺂', 'ç': '𐺃', 'd': '𐺆',
       'e': '𐺇', 'ê': '𐺈', 'f': '𐺉', 'g': '𐺊', 'h': '𐺋',
@@ -142,7 +148,6 @@
       'ه': '𐺋', 'و': '𐺣', 'ي': '𐺦', 'ى': '𐺦'
     };
 
-    // 2. قوائم الخيارات متعددة الأوجه للحروف المشتركة
     const multiCharOptions = {
       'ك': [
         { label: 'ك (𐺏)', val: '𐺏' },
@@ -159,7 +164,7 @@
         { label: 'ج (𐺂)', val: '𐺂' }
       ],
       'ح': [
-        { label: 'ح/هـ (𐺋)', val: '𐺋' },
+        { label: 'ح (𐺋)', val: '𐺋' },
         { label: 'خ (𐺥)', val: '𐺥' }
       ],
       'س': [
@@ -168,20 +173,22 @@
       ]
     };
 
-    let targetCharIndex = -1; // تحديد موقع الحرف المكتوب بدقة
+    let targetCharPos = -1;
 
-    function handleInput(e) {
+    function handleInput() {
       const inputEl = document.getElementById('input-text');
       const text = inputEl.value;
-      const typedChar = e.data; // الحرف المكتوب مؤخراً في أي مكان
+      const pos = inputEl.selectionStart;
 
-      // تحويل النص كاملاً أولاً
+      // ترجمة الحروف المباشرة
       updateOutput();
 
-      // فحص إذا كان الحرف المدخل حديثاً يمتلك خيارات متعددة
-      if (typedChar && multiCharOptions[typedChar]) {
-        targetCharIndex = inputEl.selectionStart - 1; // حفظ موقع الحرف بدقة
-        showPicker(typedChar, multiCharOptions[typedChar]);
+      // معرفة الحرف المدخل قبل مؤشر الكتابة مباشرة
+      const lastTypedChar = text.charAt(pos - 1);
+
+      if (lastTypedChar && multiCharOptions[lastTypedChar]) {
+        targetCharPos = pos - 1;
+        showPicker(lastTypedChar, multiCharOptions[lastTypedChar]);
       } else {
         hidePicker();
       }
@@ -202,14 +209,14 @@
       const title = document.getElementById('picker-title');
       const container = document.getElementById('picker-options');
 
-      title.innerText = `اختر الرمز الإيزيدي المناسب لـ (${char}):`;
+      title.innerText = `اختر الحرف الإيزيدي المناسب لـ (${char}):`;
       container.innerHTML = '';
 
       options.forEach(opt => {
         const btn = document.createElement('button');
         btn.className = 'picker-btn';
         btn.innerText = opt.label;
-        btn.onclick = () => replaceSelectedChar(opt.val);
+        btn.onclick = () => replaceChar(opt.val);
         container.appendChild(btn);
       });
 
@@ -220,14 +227,13 @@
       document.getElementById('char-picker').style.display = 'none';
     }
 
-    function replaceSelectedChar(ezidiChar) {
+    function replaceChar(ezidiChar) {
       const outputEl = document.getElementById('output-text');
-      let currentOutput = outputEl.value.split('');
+      let outArr = outputEl.value.split('');
 
-      // استبدال الحرف الإيزيدي في نفس الموقع بالضبط الذي كُتب فيه الحرف الأصلي
-      if (targetCharIndex >= 0 && targetCharIndex < currentOutput.length) {
-        currentOutput[targetCharIndex] = ezidiChar;
-        outputEl.value = currentOutput.join('');
+      if (targetCharPos >= 0 && targetCharPos < outArr.length) {
+        outArr[targetCharPos] = ezidiChar;
+        outputEl.value = outArr.join('');
       }
 
       hidePicker();
