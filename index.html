@@ -150,7 +150,7 @@
   <div class="header-branding">
     <div class="brand-logo">𒀭</div>
     <h1 class="brand-name">Akademiya Ezidi</h1>
-    <p class="subtitle">اكتب بالعربية أو (اللاتينية) للتحويل المباشر إلى الإيزيدية</p>
+    <p class="subtitle">اكتب بالعربية أو الكرمانجية (اللاتينية) للتحويل المباشر إلى الإيزيدية</p>
   </div>
 
   <div class="main-container">
@@ -162,7 +162,7 @@
     <div class="translator-box">
       <div class="panel">
         <label for="input-text">النص الأصلي (عربي / لاتيني):</label>
-        <textarea id="input-text" placeholder="اكتب هنا..." oninput="processInput()" onkeyup="processInput()"></textarea>
+        <textarea id="input-text" placeholder="اكتب هنا..." oninput="processInput()"></textarea>
       </div>
 
       <div class="panel">
@@ -244,6 +244,7 @@
     };
 
     let targetCharIndex = -1;
+    let manualOverrides = {};
 
     function processInput() {
       const inputEl = document.getElementById('input-text');
@@ -267,10 +268,17 @@
 
     function updateOutputText(inputText) {
       let output = '';
-      for (let char of Array.from(inputText)) {
-        const lower = char.toLowerCase();
-        output += defaultMap[lower] !== undefined ? defaultMap[lower] : char;
-      }
+      const textArr = Array.from(inputText);
+      
+      textArr.forEach((char, idx) => {
+        if (manualOverrides[idx] !== undefined) {
+          output += manualOverrides[idx];
+        } else {
+          const lower = char.toLowerCase();
+          output += defaultMap[lower] !== undefined ? defaultMap[lower] : char;
+        }
+      });
+
       document.getElementById('output-text').value = output;
     }
 
@@ -298,12 +306,10 @@
     }
 
     function replaceTargetChar(ezidiChar) {
-      const outputEl = document.getElementById('output-text');
-      let outArr = Array.from(outputEl.value);
-
-      if (targetCharIndex >= 0 && targetCharIndex < outArr.length) {
-        outArr[targetCharIndex] = ezidiChar;
-        outputEl.value = outArr.join('');
+      if (targetCharIndex >= 0) {
+        manualOverrides[targetCharIndex] = ezidiChar;
+        const inputEl = document.getElementById('input-text');
+        updateOutputText(inputEl.value);
       }
 
       hidePicker();
