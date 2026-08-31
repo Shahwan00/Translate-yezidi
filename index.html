@@ -4,6 +4,12 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>تحويل الحروف إلى الإيزيدية</title>
+
+  <!-- استدعاء خط الإيزيدية الرسمي من غوغل -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Yezidi:wght@400;700&display=swap" rel="stylesheet">
+
   <style>
     * { box-sizing: border-box; font-family: system-ui, -apple-system, sans-serif; }
     body { background-color: #f0f2f5; margin: 0; padding: 20px; color: #333; }
@@ -18,7 +24,7 @@
       gap: 15px;
     }
 
-    /* شريط خيارات الحروف العائم */
+    /* نافذة الاختيارات الحروف المتعددة */
     .char-picker {
       background: #e7f5ff;
       border: 2px solid #4a90e2;
@@ -50,9 +56,9 @@
       padding: 8px 16px;
       border-radius: 6px;
       cursor: pointer;
-      font-size: 20px;
+      font-size: 22px;
       font-weight: bold;
-      transition: all 0.2s ease;
+      font-family: 'Noto Sans Yezidi', system-ui, sans-serif;
     }
 
     .picker-btn:hover, .picker-btn:active {
@@ -93,8 +99,9 @@
     
     .ezidi-output {
       background-color: #fafafa;
-      font-size: 24px;
-      line-height: 1.6;
+      font-size: 26px;
+      line-height: 1.8;
+      font-family: 'Noto Sans Yezidi', sans-serif !important;
     }
 
     @media (max-width: 768px) {
@@ -127,47 +134,70 @@
   </div>
 
   <script>
-    // خريطة تحويل الأحرف مقروءة بأكواد يونيكود الآمنة
+    // الخريطة الأساسية بناءً على الجدول المرفق حصراً
     const defaultMap = {
-      'a': '\u{10E80}', 'b': '\u{10E81}', 'c': '\u{10E82}', 'ç': '\u{10E83}', 'd': '\u{10E86}',
-      'e': '\u{10E87}', 'ê': '\u{10E88}', 'f': '\u{10E89}', 'g': '\u{10E8A}', 'h': '\u{10E8B}',
-      'i': '\u{10E8C}', 'î': '\u{10E8D}', 'j': '\u{10E8E}', 'k': '\u{10E8F}', 'l': '\u{10E91}',
-      'm': '\u{10E93}', 'n': '\u{10E94}', 'o': '\u{10E97}', 'p': '\u{10E98}', 'q': '\u{10E9A}',
-      'r': '\u{10E9B}', 's': '\u{10E9D}', 'ş': '\u{10E9E}', 't': '\u{10E9F}', 'u': '\u{10EA0}',
-      'û': '\u{10EA1}', 'v': '\u{10EA2}', 'w': '\u{10EA3}', 'x': '\u{10EA5}', 'y': '\u{10EA6}', 'z': '\u{10EA7}',
-
-      'ا': '\u{10E80}', 'أ': '\u{10E80}', 'إ': '\u{10E80}', 'آ': '\u{10E80}', 'ء': '\u{10E80}',
-      'ب': '\u{10E81}', 'پ': '\u{10E98}', 'ت': '\u{10E9F}', 'ث': '\u{10E9F}', 'ج': '\u{10E82}',
-      'چ': '\u{10E83}', 'ح': '\u{10E8B}', 'خ': '\u{10EA5}', 'د': '\u{10E86}', 'ذ': '\u{10EA7}',
-      'ر': '\u{10E9B}', 'ز': '\u{10EA7}', 'ژ': '\u{10E8E}', 'س': '\u{10E9D}', 'ش': '\u{10E9E}',
-      'ص': '\u{10E9D}', 'ض': '\u{10EA7}', 'ط': '\u{10E9F}', 'ظ': '\u{10EA7}', 'ع': '\u{10E80}',
-      'غ': '\u{10E8A}', 'ف': '\u{10E89}', 'ڤ': '\u{10EA2}', 'ق': '\u{10E9A}', 'ك': '\u{10E8F}',
-      'گ': '\u{10E9F}', 'ڱ': '\u{10E9E}', 'ل': '\u{10E91}', 'م': '\u{10E93}', 'ن': '\u{10E94}',
-      'ه': '\u{10E8B}', 'و': '\u{10EA3}', 'ي': '\u{10EA6}', 'ى': '\u{10EA6}'
+      'a': '\u{10E80}', 'ا': '\u{10E80}',
+      'b': '\u{10E81}', 'ب': '\u{10E81}',
+      'p': '\u{10E82}', 'پ': '\u{10E82}',
+      'c': '\u{10E86}', 'ج': '\u{10E86}',
+      'ç': '\u{10E87}', 'چ': '\u{10E87}',
+      'd': '\u{10E8B}', 'د': '\u{10E8B}',
+      'r': '\u{10E8D}', 'ر': '\u{10E8D}',
+      'rr': '\u{10E8E}', 'ڕ': '\u{10E8E}',
+      'z': '\u{10E8F}', 'ز': '\u{10E8F}',
+      'j': '\u{10E90}', 'ژ': '\u{10E90}',
+      's': '\u{10E91}', 'س': '\u{10E91}',
+      'ş': '\u{10E92}', 'ش': '\u{10E92}',
+      'ع': '\u{10E97}',
+      'f': '\u{10E99}', 'ف': '\u{10E99}',
+      'v': '\u{10E9B}', 'ڤ': '\u{10E9B}',
+      'q': '\u{10E9C}', 'ق': '\u{10E9C}',
+      'k': '\u{10E9D}', 'ك': '\u{10E9D}',
+      'g': '\u{10E9F}', 'گ': '\u{10E9F}',
+      'l': '\u{10EA0}', 'ل': '\u{10EA0}',
+      'll': '\u{10EB0}', 'ڵ': '\u{10EB0}',
+      'm': '\u{10EA1}', 'م': '\u{10EA1}',
+      'n': '\u{10EA2}', 'ن': '\u{10EA2}',
+      'w': '\u{10EA3}', 'و': '\u{10EA3}',
+      'o': '\u{10EA5}', 'ۆ': '\u{10EA5}',
+      'e': '\u{10EA6}', 'ە': '\u{10EA6}',
+      'h': '\u{10EA7}', 'ه': '\u{10EA7}',
+      'y': '\u{10EA8}', 'ي': '\u{10EA8}',
+      'ê': '\u{10EA9}', 'ێ': '\u{10EA9}',
+      'x': '\u{10E8A}', 'خ': '\u{10E8A}',
+      'ح': '\u{10E89}',
+      't': '\u{10E84}', 'ت': '\u{10E84}',
+      'ط': '\u{10E95}',
+      'غ': '\u{10E98}',
+      'î': '\u{10EB1}', 'ئ': '\u{10EB1}',
+      'i': '\u{10E8C}'
     };
 
+    // الحروف التي تمتلك أكثر من خيار إيزيدي حسب قائمتك
     const multiCharOptions = {
-      'ك': [
-        { label: 'ك (\u{10E8F})', val: '\u{10E8F}' },
-        { label: 'گ (\u{10E9F})', val: '\u{10E9F}' },
-        { label: 'ڱ (\u{10E9E})', val: '\u{10E9E}' }
+      'پ': [
+        { label: 'پ (𐺂)', val: '\u{10E82}' },
+        { label: 'پ (𐺃)', val: '\u{10E83}' }
       ],
-      'ج': [
-        { label: 'ج (\u{10E82})', val: '\u{10E82}' },
-        { label: 'چ (\u{10E83})', val: '\u{10E83}' },
-        { label: 'ژ (\u{10E8E})', val: '\u{10E8E}' }
+      'p': [
+        { label: 'P (𐺂)', val: '\u{10E82}' },
+        { label: 'P (𐺃)', val: '\u{10E83}' }
       ],
       'چ': [
-        { label: 'چ (\u{10E83})', val: '\u{10E83}' },
-        { label: 'ج (\u{10E82})', val: '\u{10E82}' }
+        { label: 'چ (𐺇)', val: '\u{10E87}' },
+        { label: 'چ (𐺈)', val: '\u{10E88}' }
       ],
-      'ح': [
-        { label: 'ح (\u{10E8B})', val: '\u{10E8B}' },
-        { label: 'خ (\u{10EA5})', val: '\u{10EA5}' }
+      'ç': [
+        { label: 'Ç (𐺇)', val: '\u{10E87}' },
+        { label: 'Ç (𐺈)', val: '\u{10E88}' }
       ],
-      'س': [
-        { label: 'س (\u{10E9D})', val: '\u{10E9D}' },
-        { label: 'ش (\u{10E9E})', val: '\u{10E9E}' }
+      'گ': [
+        { label: 'گ (𐺟)', val: '\u{10E9F}' },
+        { label: 'گ (𐺞)', val: '\u{10E9E}' }
+      ],
+      'g': [
+        { label: 'G (𐺟)', val: '\u{10E9F}' },
+        { label: 'G (𐺞)', val: '\u{10E9E}' }
       ]
     };
 
