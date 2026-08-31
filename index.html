@@ -2,62 +2,111 @@
 <html lang="ar" dir="rtl">
 <head>
   <meta charset="UTF-8">
-  <title>مترجم حروف إيزيدي مباشر</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>مترجم الحروف العربية والكرمانجية إلى الإيزيدية</title>
   <style>
-    body { font-family: system-ui, sans-serif; padding: 30px; background: #f8f9fa; text-align: center; }
-    .card { max-width: 600px; margin: auto; background: white; padding: 25px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.08); }
-    textarea { width: 100%; height: 110px; font-size: 20px; padding: 12px; border-radius: 8px; border: 1px solid #ccc; box-sizing: border-box; margin-top: 8px; }
-    .output { background: #f1f3f5; padding: 15px; border-radius: 8px; text-align: right; font-size: 26px; min-height: 60px; margin-top: 8px; word-break: break-all; border: 1px solid #e9ecef; }
-    label { font-weight: bold; display: block; text-align: right; margin-top: 15px; }
+    * { box-sizing: border-box; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
+    body { background-color: #f0f2f5; margin: 0; padding: 20px; color: #333; }
+    h1 { text-align: center; margin-bottom: 5px; color: #1a1a1a; }
+    p.subtitle { text-align: center; color: #666; margin-bottom: 25px; }
+    
+    .translator-box {
+      display: flex;
+      flex-direction: row;
+      gap: 15px;
+      max-width: 1000px;
+      margin: 0 auto;
+    }
+    
+    .panel {
+      flex: 1;
+      background: #ffffff;
+      border-radius: 8px;
+      padding: 15px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+      display: flex;
+      flex-direction: column;
+    }
+    
+    label { font-weight: bold; margin-bottom: 10px; color: #444; }
+    
+    textarea {
+      width: 100%;
+      height: 250px;
+      border: 1px solid #ccc;
+      border-radius: 6px;
+      padding: 12px;
+      font-size: 18px;
+      resize: vertical;
+      outline: none;
+    }
+    
+    textarea:focus { border-color: #4a90e2; }
+    
+    .ezidi-output {
+      background-color: #fafafa;
+      font-size: 22px;
+      line-height: 1.6;
+    }
+
+    @media (max-width: 768px) {
+      .translator-box { flex-direction: column; }
+    }
   </style>
 </head>
 <body>
 
-<div class="card">
-  <h2>تحويل الحروف إلى الإيزيدية مباشرة</h2>
-  
-  <label for="inputText">اكتب هنا (حروف عربية أو كرمانجية لاتينية):</label>
-  <textarea id="inputText" placeholder="اكتب أي حرف..." oninput="convertChars()"></textarea>
+  <h1>تحويل الحروف إلى الإيزيدية (𐺀-𐺷)</h1>
+  <p class="subtitle">اكتب بالعربية أو الكرمانجية (اللاتينية) للتحويل المباشر</p>
 
-  <label>النص بالحروف الإيزيدية:</label>
-  <div id="outputText" class="output"></div>
-</div>
+  <div class="translator-box">
+    <!-- حقل الإدخال -->
+    <div class="panel">
+      <label for="input-text">النص الأصلي (عربي / Kurdish):</label>
+      <textarea id="input-text" placeholder="اكتب هنا... مثلاً: merhaba أو مرحبا" oninput="convertText()"></textarea>
+    </div>
 
-<script>
-// خريطة تحويل الحروف مباشرة (عربي ولاتيني -> إيزيدي)
-const charMap = {
-  // الحروف الكرمانجية اللاتينية
-  'a': '𐺀', 'b': '𐺁', 'c': '𐺂', 'ç': '𐺃', 'd': '𐺆',
-  'e': '𐺇', 'ê': '𐺈', 'f': '𐺉', 'g': '𐺊', 'h': '𐺋',
-  'i': '𐺌', 'î': '𐺍', 'j': '𐺎', 'k': '𐺏', 'l': '𐺑',
-  'm': '𐺓', 'n': '𐺔', 'o': '𐺗', 'p': '𐺘', 'q': '𐺚',
-  'r': '𐺛', 's': '𐺝', 'ş': '𐺞', 't': '𐺟', 'u': '𐺠',
-  'û': '𐺡', 'v': '𐺢', 'w': '𐺣', 'x': '𐺥', 'y': '𐺦', 'z': '𐺧',
+    <!-- حقل النتيجة -->
+    <div class="panel">
+      <label for="output-text">النص الإيزيدي (Ezidi):</label>
+      <textarea id="output-text" class="ezidi-output" readonly placeholder="النتيجة تظهر هنا..."></textarea>
+    </div>
+  </div>
 
-  // الحروف العربية المقابلة
-  'ا': '𐺀', 'أ': '𐺀', 'إ': '𐺀', 'آ': '𐺀', 'ء': '𐺀',
-  'ب': '𐺁', 'ج': '𐺂', 'د': '𐺆', 'ف': '𐺉',
-  'غ': '𐺊', 'ه': '𐺋', 'هـ': '𐺋', 'ح': '𐺋',
-  'ك': '𐺏', 'ل': '𐺑', 'م': '𐺓', 'ن': '𐺔',
-  'پ': '𐺘', 'ق': '𐺚', 'ر': '𐺛', 'س': '𐺝', 'ص': '𐺝',
-  'ش': '𐺞', 'ت': '𐺟', 'ط': '𐺟', 'ث': '𐺟',
-  'و': '𐺣', 'خ': '𐺥', 'ي': '𐺦', 'ى': '𐺦',
-  'ز': '𐺧', 'ض': '𐺧', 'ظ': '𐺧', 'ذ': '𐺧', 'ع': '𐺀'
-};
+  <script>
+    // خريطة تحويل الحروف المباشرة
+    const map = {
+      // الحروف الكرمانجية اللاتينية (Kurdish Latin)
+      'a': '𐺀', 'b': '𐺁', 'c': '𐺂', 'ç': '𐺃', 'd': '𐺆',
+      'e': '𐺇', 'ê': '𐺈', 'f': '𐺉', 'g': '𐺊', 'h': '𐺋',
+      'i': '𐺌', 'î': '𐺍', 'j': '𐺎', 'k': '𐺏', 'l': '𐺑',
+      'm': '𐺓', 'n': '𐺔', 'o': '𐺗', 'p': '𐺘', 'q': '𐺚',
+      'r': '𐺛', 's': '𐺝', 'ş': '𐺞', 't': '𐺟', 'u': '𐺠',
+      'û': '𐺡', 'v': '𐺢', 'w': '𐺣', 'x': '𐺥', 'y': '𐺦', 'z': '𐺧',
 
-function convertChars() {
-  const input = document.getElementById("inputText").value;
-  let result = "";
+      // الحروف العربية المقابلة (Arabic Letters)
+      'ا': '𐺀', 'أ': '𐺀', 'إ': '𐺀', 'آ': '𐺀', 'ء': '𐺀',
+      'ب': '𐺁', 'ج': '𐺂', 'د': '𐺆', 'ف': '𐺉', 'غ': '𐺊',
+      'ه': '𐺋', 'ح': '𐺋', 'ك': '𐺏', 'ل': '𐺑', 'م': '𐺓',
+      'ن': '𐺔', 'پ': '𐺘', 'ق': '𐺚', 'ر': '𐺛', 'س': '𐺝',
+      'ص': '𐺝', 'ش': '𐺞', 'ت': '𐺟', 'ط': '𐺟', 'ث': '𐺟',
+      'و': '𐺣', 'خ': '𐺥', 'ي': '𐺦', 'ى': '𐺦', 'ز': '𐺧',
+      'ض': '𐺧', 'ظ': '𐺧', 'ذ': '𐺧', 'ع': '𐺀'
+    };
 
-  for (let char of input) {
-    const lowerChar = char.toLowerCase();
-    // البحث عن الحرف في الخريطة، وإذا لم يوجد يُترك كما هو (مثل المسافات)
-    result += charMap[lowerChar] || char;
-  }
+    function convertText() {
+      const input = document.getElementById('input-text').value;
+      let output = '';
 
-  document.getElementById("outputText").innerText = result;
-}
-</script>
+      for (let char of input) {
+        const lowerChar = char.toLowerCase();
+        // يستبدل الحرف بالرمز الإيزيدي إذا وجده، أو يتركه كما هو (كالمسافات والأرقام)
+        output += map[lowerChar] !== undefined ? map[lowerChar] : char;
+      }
+
+      document.getElementById('output-text').value = output;
+    }
+  </script>
 
 </body>
 </html>
