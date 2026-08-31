@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>مترجم الحروف العربية واللاتينية إلى الإيزيدية</title>
+  <title>مترجم الحروف إلى الإيزيدية</title>
   <style>
     * { box-sizing: border-box; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
     body { background-color: #f0f2f5; margin: 0; padding: 20px; color: #333; }
@@ -50,16 +50,16 @@
       line-height: 1.6;
     }
 
-    /* قائمة اختيار حرف الكاف */
+    /* نافذة الخيارات العائمة */
     .char-picker {
       position: absolute;
-      top: 60px;
-      right: 30px;
+      top: 50px;
+      right: 25px;
       background: #ffffff;
       border: 2px solid #4a90e2;
       border-radius: 8px;
-      padding: 10px 15px;
-      box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+      padding: 12px;
+      box-shadow: 0 4px 15px rgba(0,0,0,0.15);
       display: none;
       z-index: 100;
     }
@@ -73,14 +73,15 @@
 
     .picker-options {
       display: flex;
-      gap: 10px;
+      gap: 8px;
+      flex-wrap: wrap;
     }
 
     .picker-btn {
       background: #e7f5ff;
       border: 1px solid #74c0fc;
       color: #1864ab;
-      padding: 6px 14px;
+      padding: 6px 12px;
       border-radius: 5px;
       cursor: pointer;
       font-size: 18px;
@@ -99,23 +100,19 @@
 <body>
 
   <h1>تحويل الحروف إلى الإيزيدية</h1>
-  <p class="subtitle">اكتب بالعربية أو الكرمانجية (اللاتينية) للتحويل المباشر</p>
+  <p class="subtitle">اكتب بالعربية أو الكرمانجية في أي مكان وتظهر قائمة الاختيارات فوراً</p>
 
   <div class="translator-box">
-    <!-- قائمة اختيار الحرف المقابل لـ ك -->
+    <!-- نافذة اختيارات الحروف المتاحة -->
     <div id="char-picker" class="char-picker">
-      <p>اختر الحرف الإيزيدي المطلوبة لـ (ك):</p>
-      <div class="picker-options">
-        <button class="picker-btn" onclick="selectChar('𐺝')">ك (𐺝)</button>
-        <button class="picker-btn" onclick="selectChar('𐺟')">گ (𐺟)</button>
-        <button class="picker-btn" onclick="selectChar('𐺞')">ڱ (𐺞)</button>
-      </div>
+      <p id="picker-title">اختر الحرف الإيزيدي المطلوب:</p>
+      <div id="picker-options" class="picker-options"></div>
     </div>
 
     <!-- حقل الإدخال -->
     <div class="panel">
       <label for="input-text">النص الأصلي (عربي / لاتيني):</label>
-      <textarea id="input-text" placeholder="اكتب هنا..." oninput="convertText(event)"></textarea>
+      <textarea id="input-text" placeholder="اكتب أي حرف في البداية أو الوسط أو النهاية..." oninput="handleInput(event)"></textarea>
     </div>
 
     <!-- حقل النتيجة -->
@@ -126,8 +123,8 @@
   </div>
 
   <script>
-    // خريطة تحويل الحروف المباشرة
-    const map = {
+    // 1. خريطة التحويل الافتراضية للحروف
+    const defaultMap = {
       'a': '𐺀', 'b': '𐺁', 'c': '𐺂', 'ç': '𐺃', 'd': '𐺆',
       'e': '𐺇', 'ê': '𐺈', 'f': '𐺉', 'g': '𐺊', 'h': '𐺋',
       'i': '𐺌', 'î': '𐺍', 'j': '𐺎', 'k': '𐺏', 'l': '𐺑',
@@ -145,40 +142,96 @@
       'ه': '𐺋', 'و': '𐺣', 'ي': '𐺦', 'ى': '𐺦'
     };
 
-    let lastKIndex = -1;
+    // 2. قوائم الخيارات متعددة الأوجه للحروف المشتركة
+    const multiCharOptions = {
+      'ك': [
+        { label: 'ك (𐺏)', val: '𐺏' },
+        { label: 'گ (𐺟)', val: '𐺟' },
+        { label: 'ڱ (𐺞)', val: '𐺞' }
+      ],
+      'ج': [
+        { label: 'ج (𐺂)', val: '𐺂' },
+        { label: 'چ (𐺃)', val: '𐺃' },
+        { label: 'ژ (𐺎)', val: '𐺎' }
+      ],
+      'چ': [
+        { label: 'چ (𐺃)', val: '𐺃' },
+        { label: 'ج (𐺂)', val: '𐺂' }
+      ],
+      'ح': [
+        { label: 'ح/هـ (𐺋)', val: '𐺋' },
+        { label: 'خ (𐺥)', val: '𐺥' }
+      ],
+      'س': [
+        { label: 'س (𐺝)', val: '𐺝' },
+        { label: 'ش (𐺞)', val: '𐺞' }
+      ]
+    };
 
-    function convertText(event) {
+    let targetCharIndex = -1; // تحديد موقع الحرف المكتوب بدقة
+
+    function handleInput(e) {
       const inputEl = document.getElementById('input-text');
-      const input = inputEl.value;
-      const picker = document.getElementById('char-picker');
+      const text = inputEl.value;
+      const typedChar = e.data; // الحرف المكتوب مؤخراً في أي مكان
 
-      // إظهار قائمة الاختيارات عند كتابة حرف "ك"
-      if (event && event.data === 'ك') {
-        picker.style.display = 'block';
-      } else if (!input.includes('ك')) {
-        picker.style.display = 'none';
+      // تحويل النص كاملاً أولاً
+      updateOutput();
+
+      // فحص إذا كان الحرف المدخل حديثاً يمتلك خيارات متعددة
+      if (typedChar && multiCharOptions[typedChar]) {
+        targetCharIndex = inputEl.selectionStart - 1; // حفظ موقع الحرف بدقة
+        showPicker(typedChar, multiCharOptions[typedChar]);
+      } else {
+        hidePicker();
       }
+    }
 
+    function updateOutput() {
+      const text = document.getElementById('input-text').value;
       let output = '';
-      for (let char of input) {
-        const lowerChar = char.toLowerCase();
-        output += map[lowerChar] !== undefined ? map[lowerChar] : char;
+      for (let char of text) {
+        const lower = char.toLowerCase();
+        output += defaultMap[lower] !== undefined ? defaultMap[lower] : char;
       }
-
       document.getElementById('output-text').value = output;
     }
 
-    function selectChar(selectedEzidiChar) {
-      const inputEl = document.getElementById('input-text');
-      const outputEl = document.getElementById('output-text');
+    function showPicker(char, options) {
       const picker = document.getElementById('char-picker');
+      const title = document.getElementById('picker-title');
+      const container = document.getElementById('picker-options');
 
-      // استبدال ك المكتوبة بالحرف المختار في النتيجة
-      let currentOutput = outputEl.value;
-      outputEl.value = currentOutput.replace(/𐺏(?=[^𐺏]*$)/, selectedEzidiChar);
+      title.innerText = `اختر الرمز الإيزيدي المناسب لـ (${char}):`;
+      container.innerHTML = '';
 
-      picker.style.display = 'none';
-      inputEl.focus();
+      options.forEach(opt => {
+        const btn = document.createElement('button');
+        btn.className = 'picker-btn';
+        btn.innerText = opt.label;
+        btn.onclick = () => replaceSelectedChar(opt.val);
+        container.appendChild(btn);
+      });
+
+      picker.style.display = 'block';
+    }
+
+    function hidePicker() {
+      document.getElementById('char-picker').style.display = 'none';
+    }
+
+    function replaceSelectedChar(ezidiChar) {
+      const outputEl = document.getElementById('output-text');
+      let currentOutput = outputEl.value.split('');
+
+      // استبدال الحرف الإيزيدي في نفس الموقع بالضبط الذي كُتب فيه الحرف الأصلي
+      if (targetCharIndex >= 0 && targetCharIndex < currentOutput.length) {
+        currentOutput[targetCharIndex] = ezidiChar;
+        outputEl.value = currentOutput.join('');
+      }
+
+      hidePicker();
+      document.getElementById('input-text').focus();
     }
   </script>
 
