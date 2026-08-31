@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>تحويل الحروف إلى الإيزيدية</title>
   <style>
-    * { box-sizing: border-box; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
+    * { box-sizing: border-box; font-family: system-ui, -apple-system, sans-serif; }
     body { background-color: #f0f2f5; margin: 0; padding: 20px; color: #333; }
     h1 { text-align: center; margin-bottom: 5px; color: #1a1a1a; }
     p.subtitle { text-align: center; color: #666; margin-bottom: 25px; }
@@ -18,14 +18,13 @@
       gap: 15px;
     }
 
-    /* نافذة اختيارات الحروف العائمة والمضمونة الظهور */
     .char-picker {
       background: #e7f5ff;
       border: 2px solid #4a90e2;
       border-radius: 8px;
       padding: 12px 15px;
       box-shadow: 0 4px 12px rgba(0,0,0,0.1);
-      display: none; /* تظهر فقط عند كتابة الحروف المستهدفة */
+      display: none;
       text-align: center;
     }
 
@@ -55,7 +54,7 @@
       transition: all 0.2s ease;
     }
 
-    .picker-btn:active, .picker-btn:hover {
+    .picker-btn:hover {
       background: #1c7ed6;
       color: #ffffff;
     }
@@ -108,20 +107,17 @@
   <p class="subtitle">اكتب بالعربية أو الكرمانجية (اللاتينية) للتحويل المباشر</p>
 
   <div class="main-container">
-    <!-- شريط الخيارات (يظهر أعلى الحقول مباشرة عند كتابة ك، ج، چ، ح، س) -->
     <div id="char-picker" class="char-picker">
       <p id="picker-title">اختر الرمز الإيزيدي المطلوب:</p>
       <div id="picker-options" class="picker-options"></div>
     </div>
 
     <div class="translator-box">
-      <!-- حقل الإدخال -->
       <div class="panel">
         <label for="input-text">النص الأصلي (عربي / لاتيني):</label>
         <textarea id="input-text" placeholder="اكتب هنا..." oninput="handleInput()"></textarea>
       </div>
 
-      <!-- حقل النتيجة -->
       <div class="panel">
         <label for="output-text">النص الإيزيدي (Ezidi):</label>
         <textarea id="output-text" class="ezidi-output" readonly placeholder="النتيجة تظهر هنا..."></textarea>
@@ -173,22 +169,20 @@
       ]
     };
 
-    let targetCharPos = -1;
+    let targetCharIndex = -1;
 
     function handleInput() {
       const inputEl = document.getElementById('input-text');
       const text = inputEl.value;
       const pos = inputEl.selectionStart;
 
-      // ترجمة الحروف المباشرة
       updateOutput();
 
-      // معرفة الحرف المدخل قبل مؤشر الكتابة مباشرة
-      const lastTypedChar = text.charAt(pos - 1);
+      const lastChar = Array.from(text.slice(0, pos)).pop();
 
-      if (lastTypedChar && multiCharOptions[lastTypedChar]) {
-        targetCharPos = pos - 1;
-        showPicker(lastTypedChar, multiCharOptions[lastTypedChar]);
+      if (lastChar && multiCharOptions[lastChar]) {
+        targetCharIndex = Array.from(text.slice(0, pos)).length - 1;
+        showPicker(lastChar, multiCharOptions[lastChar]);
       } else {
         hidePicker();
       }
@@ -197,7 +191,7 @@
     function updateOutput() {
       const text = document.getElementById('input-text').value;
       let output = '';
-      for (let char of text) {
+      for (let char of Array.from(text)) {
         const lower = char.toLowerCase();
         output += defaultMap[lower] !== undefined ? defaultMap[lower] : char;
       }
@@ -209,7 +203,7 @@
       const title = document.getElementById('picker-title');
       const container = document.getElementById('picker-options');
 
-      title.innerText = `اختر الحرف الإيزيدي المناسب لـ (${char}):`;
+      title.innerText = `اختر الرمز الإيزيدي المناسب لـ (${char}):`;
       container.innerHTML = '';
 
       options.forEach(opt => {
@@ -229,10 +223,10 @@
 
     function replaceChar(ezidiChar) {
       const outputEl = document.getElementById('output-text');
-      let outArr = outputEl.value.split('');
+      let outArr = Array.from(outputEl.value);
 
-      if (targetCharPos >= 0 && targetCharPos < outArr.length) {
-        outArr[targetCharPos] = ezidiChar;
+      if (targetCharIndex >= 0 && targetCharIndex < outArr.length) {
+        outArr[targetCharIndex] = ezidiChar;
         outputEl.value = outArr.join('');
       }
 
