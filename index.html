@@ -16,6 +16,7 @@
       gap: 15px;
       max-width: 1000px;
       margin: 0 auto;
+      position: relative;
     }
     
     .panel {
@@ -49,34 +50,49 @@
       line-height: 1.6;
     }
 
-    /* مربع التنبيه والاقتراح "هل تقصد" */
-    .suggestion-box {
-      max-width: 1000px;
-      margin: 15px auto 0 auto;
-      background: #e7f5ff;
-      border: 1px solid #74c0fc;
+    /* قائمة اختيار حرف الكاف */
+    .char-picker {
+      position: absolute;
+      top: 60px;
+      right: 30px;
+      background: #ffffff;
+      border: 2px solid #4a90e2;
       border-radius: 8px;
       padding: 10px 15px;
-      display: none; /* مخفي افتراضياً */
-      text-align: right;
-      color: #1864ab;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+      display: none;
+      z-index: 100;
     }
 
-    .suggestion-btn {
-      background: #1c7ed6;
-      color: white;
-      border: none;
-      padding: 5px 12px;
-      border-radius: 4px;
-      cursor: pointer;
+    .char-picker p {
+      margin: 0 0 8px 0;
+      font-size: 14px;
       font-weight: bold;
-      margin-right: 10px;
+      color: #333;
     }
 
-    .suggestion-btn:hover { background: #1971c2; }
+    .picker-options {
+      display: flex;
+      gap: 10px;
+    }
+
+    .picker-btn {
+      background: #e7f5ff;
+      border: 1px solid #74c0fc;
+      color: #1864ab;
+      padding: 6px 14px;
+      border-radius: 5px;
+      cursor: pointer;
+      font-size: 18px;
+      font-weight: bold;
+      transition: background 0.2s;
+    }
+
+    .picker-btn:hover { background: #d0ebff; }
 
     @media (max-width: 768px) {
       .translator-box { flex-direction: column; }
+      .char-picker { right: 15px; left: 15px; }
     }
   </style>
 </head>
@@ -86,10 +102,20 @@
   <p class="subtitle">اكتب بالعربية أو الكرمانجية (اللاتينية) للتحويل المباشر</p>
 
   <div class="translator-box">
+    <!-- قائمة اختيار الحرف المقابل لـ ك -->
+    <div id="char-picker" class="char-picker">
+      <p>اختر الحرف الإيزيدي المطلوبة لـ (ك):</p>
+      <div class="picker-options">
+        <button class="picker-btn" onclick="selectChar('𐺏')">ك (𐺏)</button>
+        <button class="picker-btn" onclick="selectChar('𐺟')">گ (𐺟)</button>
+        <button class="picker-btn" onclick="selectChar('𐺞')">ڱ (𐺞)</button>
+      </div>
+    </div>
+
     <!-- حقل الإدخال -->
     <div class="panel">
       <label for="input-text">النص الأصلي (عربي / لاتيني):</label>
-      <textarea id="input-text" placeholder="اكتب هنا... مثلاً: ڱالو أو merhaba" oninput="convertText()"></textarea>
+      <textarea id="input-text" placeholder="اكتب هنا..." oninput="convertText(event)"></textarea>
     </div>
 
     <!-- حقل النتيجة -->
@@ -99,16 +125,9 @@
     </div>
   </div>
 
-  <!-- صندوق "هل تقصد" عند اكتشاف حرف خاص كـ (ڱ) -->
-  <div id="suggestion-box" class="suggestion-box">
-    <span id="suggestion-text"></span>
-    <button class="suggestion-btn" onclick="applySuggestion()">تطبيق التصحيح</button>
-  </div>
-
   <script>
-    // خريطة تحويل الحروف المباشرة شاملة الحروف الكردية والعربية
+    // خريطة تحويل الحروف المباشرة
     const map = {
-      // الحروف الكرمانجية اللاتينية (Kurdish Latin)
       'a': '𐺀', 'b': '𐺁', 'c': '𐺂', 'ç': '𐺃', 'd': '𐺆',
       'e': '𐺇', 'ê': '𐺈', 'f': '𐺉', 'g': '𐺊', 'h': '𐺋',
       'i': '𐺌', 'î': '𐺍', 'j': '𐺎', 'k': '𐺏', 'l': '𐺑',
@@ -116,52 +135,50 @@
       'r': '𐺛', 's': '𐺝', 'ş': '𐺞', 't': '𐺟', 'u': '𐺠',
       'û': '𐺡', 'v': '𐺢', 'w': '𐺣', 'x': '𐺥', 'y': '𐺦', 'z': '𐺧',
 
-      // الحروف العربية والكردية المقابلة (Arabic & Kurdish Alphabet)
       'ا': '𐺀', 'أ': '𐺀', 'إ': '𐺀', 'آ': '𐺀', 'ء': '𐺀',
       'ب': '𐺁', 'پ': '𐺘', 'ت': '𐺟', 'ث': '𐺟', 'ج': '𐺂',
       'چ': '𐺃', 'ح': '𐺋', 'خ': '𐺥', 'د': '𐺆', 'ذ': '𐺧',
-      'ر': '𐺛', 'ڕ': '𐺛', 'ز': '𐺧', 'ژ': '𐺎', 'س': '𐺝',
-      'ش': '𐺞', 'ص': '𐺝', 'ض': '𐺧', 'ط': '𐺟', 'ظ': '𐺧',
-      'ع': '𐺀', 'غ': '𐺊', 'ف': '𐺉', 'ڤ': '𐺢', 'ق': '𐺚',
-      'ك': '𐺏', 'ک': '𐺏', 'گ': '𐺟', 'ڱ': '𐺟', // تحويل ڱ إلى حرف Gaf الإيزيدي
-      'ل': '𐺑', 'ڵ': '𐺑', 'م': '𐺓', 'ن': '𐺔', 'ه': '𐺋',
-      'و': '𐺣', 'ۆ': '𐺗', 'ي': '𐺦', 'ى': '𐺦', 'ێ': '𐺈'
+      'ر': '𐺛', 'ز': '𐺧', 'ژ': '𐺎', 'س': '𐺝', 'ش': '𐺞',
+      'ص': '𐺝', 'ض': '𐺧', 'ط': '𐺟', 'ظ': '𐺧', 'ع': '𐺀',
+      'غ': '𐺊', 'ف': '𐺉', 'ڤ': '𐺢', 'ق': '𐺚', 'ك': '𐺏',
+      'گ': '𐺟', 'ڱ': '𐺞', 'ل': '𐺑', 'م': '𐺓', 'ن': '𐺔',
+      'ه': '𐺋', 'و': '𐺣', 'ي': '𐺦', 'ى': '𐺦'
     };
 
-    let suggestedWord = "";
+    let lastKIndex = -1;
 
-    function convertText() {
-      const input = document.getElementById('input-text').value;
+    function convertText(event) {
+      const inputEl = document.getElementById('input-text');
+      const input = inputEl.value;
+      const picker = document.getElementById('char-picker');
+
+      // إظهار قائمة الاختيارات عند كتابة حرف "ك"
+      if (event && event.data === 'ك') {
+        picker.style.display = 'block';
+      } else if (!input.includes('ك')) {
+        picker.style.display = 'none';
+      }
+
       let output = '';
-
       for (let char of input) {
         const lowerChar = char.toLowerCase();
         output += map[lowerChar] !== undefined ? map[lowerChar] : char;
       }
 
       document.getElementById('output-text').value = output;
-
-      // فحص وجود أحرف خاصة مثل "ڱ" واقتراح التصحيح
-      checkSuggestions(input);
     }
 
-    function checkSuggestions(text) {
-      const suggestionBox = document.getElementById('suggestion-box');
-      const suggestionText = document.getElementById('suggestion-text');
+    function selectChar(selectedEzidiChar) {
+      const inputEl = document.getElementById('input-text');
+      const outputEl = document.getElementById('output-text');
+      const picker = document.getElementById('char-picker');
 
-      // إذا احتوت الكلمة على الحرف "ڱ"
-      if (text.includes('ڱ')) {
-        suggestedWord = text.replace(/ڱ/g, 'گ'); // استبدال ڱ بـ گ (أو الحرف العربي المقابل)
-        suggestionText.innerHTML = `💡 هل تقصد كتابة: <strong>"${suggestedWord}"</strong> بدلاً من <strong>"${text}"</strong>؟`;
-        suggestionBox.style.display = 'block';
-      } else {
-        suggestionBox.style.display = 'none';
-      }
-    }
+      // استبدال ك المكتوبة بالحرف المختار في النتيجة
+      let currentOutput = outputEl.value;
+      outputEl.value = currentOutput.replace(/𐺏(?=[^𐺏]*$)/, selectedEzidiChar);
 
-    function applySuggestion() {
-      document.getElementById('input-text').value = suggestedWord;
-      convertText(); // إعادة التحويل بالنص المحدث
+      picker.style.display = 'none';
+      inputEl.focus();
     }
   </script>
 
