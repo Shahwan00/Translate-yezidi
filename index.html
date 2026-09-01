@@ -5,10 +5,10 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Akademiya Ezidi - تحويل الحروف إلى الإيزيدية</title>
 
-  <!-- استدعاء خط النوتو الإيزيدي المعتمد من غوغل -->
+  <!-- استدعاء خط Noto Serif Yezidi المعتمد رسمياً من غوغل -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Yezidi:wght@400;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+Yezidi:wght@400;700&display=swap" rel="stylesheet">
 
   <style>
     * { 
@@ -28,6 +28,7 @@
       line-height: 1;
       margin-bottom: 5px;
       color: #1c7ed6;
+      font-family: 'Noto Serif Yezidi', serif;
     }
 
     .brand-name {
@@ -80,7 +81,7 @@
       cursor: pointer;
       font-size: 20px;
       font-weight: bold;
-      font-family: 'Noto Sans Yezidi', system-ui, sans-serif;
+      font-family: 'Noto Serif Yezidi', serif;
     }
 
     .picker-btn:hover, .picker-btn:active {
@@ -123,7 +124,7 @@
       background-color: #fafafa;
       font-size: 26px;
       line-height: 1.8;
-      font-family: 'Noto Sans Yezidi', sans-serif !important;
+      font-family: 'Noto Serif Yezidi', serif !important;
     }
 
     .footer-developers {
@@ -166,7 +167,7 @@
       </div>
 
       <div class="panel">
-        <label for="output-text">النص الإيزيدي ( 𐺩𐺏𐺨𐺋𐺨 ):</label>
+        <label for="output-text">النص الإيزيدي ( <span style="font-family: 'Noto Serif Yezidi', serif;">𐺩𐺏𐺨𐺋𐺨</span> ):</label>
         <textarea id="output-text" class="ezidi-output" readonly placeholder="النتيجة تظهر هنا..."></textarea>
       </div>
     </div>
