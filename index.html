@@ -5,12 +5,15 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Akademiya Ezidi - تحويل الحروف إلى الإيزيدية</title>
 
-  <!-- استدعاء خط Noto Serif Yezidi المعتمد رسمياً من غوغل -->
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+Yezidi:wght@400;700&display=swap" rel="stylesheet">
-
   <style>
+    /* تعريف الخط المحلي المُنَزَّل */
+    @font-face {
+      font-family: 'Noto Serif Yezidi';
+      src: url('NotoSerifYezidi-Regular.ttf') format('truetype');
+      font-weight: normal;
+      font-style: normal;
+    }
+
     * { 
       box-sizing: border-box; 
       font-family: system-ui, -apple-system, sans-serif; 
